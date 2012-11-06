@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Game!</title>
+
+        <script src="keymaster.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">
+            var previousTime = 0,
+                INTERVAL = 30,
+                W = 800,
+                H = 600,
+                avatar, 
+                LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40, FIRE = 16;
+
+            window.onload = function(){
+                var canvas = document.getElementById("canvas"),
+                    c = canvas.getContext("2d");
+
+                avatar = new Avatar();
+
+                setInterval(
+                    function () {
+                        var currentTime = new Date().getTime(),
+                            timeElapsed;
+
+                        if (previousTime == 0) {
+                            previousTime = currentTime;
+                        }
+
+                        timeElapsed = currentTime - previousTime;
+
+                        update (timeElapsed, currentTime);
+                        draw (canvas, timeElapsed, currentTime);
+
+                        previousTime = currentTime;
+                    }
+                , INTERVAL);
+            };
+
+            function update(timeElapsed, currentTime) {
+
+                if (key.isPressed(RIGHT)) {                    
+                    avatar.x += avatar.vx;
+                }
+
+                if (key.isPressed(LEFT)) {
+                    avatar.x -= avatar.vx;
+                }
+
+                if (key.isPressed(UP)) {
+                    avatar.y -= avatar.vy;    
+                }
+
+                if (key.isPressed(DOWN)) {
+                    avatar.y += avatar.vy;    
+                }
+
+                if (key.isPressed(FIRE) && avatar.canFire()) {
+                    avatar.spawnBullet();
+                }
+
+                // constrain avatar to bounds of screen.
+                avatar.x = Math.max(0, Math.min(avatar.x, W-avatar.image.width));
+                avatar.y = Math.max(0, Math.min(avatar.y, H-avatar.image.height));
+
+
+                var b = avatar.bullet;
+                if (b) {
+                    b.vx += b.ax;
+                    b.x += b.vx;
+
+                    if (b.x > W) {
+                        avatar.killBullet();
+                    }
+                }
+            }
+
+            function draw (canvas, timeElapsed, currentTime) {
+                var c = canvas.getContext("2d"), 
+                    b = avatar.bullet;
+                clearCanvas(canvas);
+
+                if (b) {
+                    // draw bullet
+                    c.drawImage(b.image, b.x, b.y);
+                }
+                // draw avatar
+                c.drawImage(avatar.image, avatar.x, avatar.y);
+            }
+
+            function clearCanvas(canvas) {
+                var c = canvas.getContext("2d");
+                c.beginPath();
+                c.rect(0,0,W,H);
+                c.fillStyle = "#CCCC99";
+                c.fill();
+            }
+
+
+            function Avatar () {
+                // position
+                this.x = 0;
+                this.y = 0;
+
+                // velocity
+                this.vx = 10;
+                this.vy = 10;
+
+                // HP
+                this.hitPoints = 10;
+
+                // view
+                this.image = new Image();
+                this.image.src = "whitemage.png";
+
+                this.bullet = null;
+
+                this.canFire = function () {
+                    return this.bullet == null;
+                }
+
+                this.spawnBullet = function () {
+                    this.bullet = new Bullet();
+                    this.bullet.x = this.x + this.image.width / 2;
+                    this.bullet.y = this.y + this.image.height / 2;
+                };
+
+                this.killBullet = function () {
+                    this.bullet = null;
+                }
+            }
+
+            function Bullet () {
+                this.x = 0;
+                this.y = 0;
+
+                this.vx = 0;
+                this.ax = 1;
+
+                this.image = new Image();
+                this.image.src = "bullet.png";
+            }
+
+        </script>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600" />
+</body>
+</html>

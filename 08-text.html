@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Game!</title>
+
+        <script src="keymaster.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">
+            var previousTime = 0,
+                INTERVAL = 30,
+                W = 800,
+                H = 600,
+                avatar, 
+                enemyManager,
+                scoreManager,
+                LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40, FIRE = 16;
+
+            window.onload = function(){
+                var canvas = document.getElementById("canvas"),
+                    c = canvas.getContext("2d");
+
+                avatar = new Avatar();
+                enemyManager = new EnemyManager();     
+
+                scoreManager = new ScoreManager();  
+                scoreManager.x = W - 200;          
+                scoreManager.y = 40;
+
+                setInterval(
+                    function () {
+                        var currentTime = new Date().getTime(),
+                            timeElapsed;
+
+                        if (previousTime == 0) {
+                            previousTime = currentTime;
+                        }
+
+                        timeElapsed = currentTime - previousTime;
+
+                        update (timeElapsed, currentTime);
+                        draw (canvas, timeElapsed, currentTime);
+
+                        previousTime = currentTime;
+                    }
+                , INTERVAL);
+            };
+
+            function update(timeElapsed, currentTime) {
+                enemyManager.update(timeElapsed, currentTime);
+
+                if (key.isPressed(RIGHT)) {                    
+                    avatar.x += avatar.vx;
+                }
+
+                if (key.isPressed(LEFT)) {
+                    avatar.x -= avatar.vx;
+                }
+
+                if (key.isPressed(UP)) {
+                    avatar.y -= avatar.vy;    
+                }
+
+                if (key.isPressed(DOWN)) {
+                    avatar.y += avatar.vy;    
+                }
+
+                if (key.isPressed(FIRE) && avatar.canFire()) {
+                    avatar.spawnBullet();
+                }
+
+                // constrain avatar to bounds of screen.
+                avatar.x = Math.max(0, Math.min(avatar.x, W-avatar.image.width));
+                avatar.y = Math.max(0, Math.min(avatar.y, H-avatar.image.height));
+
+
+                var b = avatar.bullet;
+                if (b) {
+                    b.vx += b.ax;
+                    b.x += b.vx;
+
+                    if (b.x > W) {
+                        avatar.killBullet();
+                    }
+                }
+
+                detectCollisions();
+            }
+
+            function detectCollisions () {
+                var i = 0, l = enemyManager.enemies.length;
+                for (; i < l; i++) {
+                    var enemy = enemyManager.enemies[i];
+                    if (enemy == null) { continue; }
+                    if (
+                        (avatar.x + avatar.image.width > enemy.x && avatar.x < enemy.x + enemy.width()) &&
+                        (avatar.y + avatar.image.height > enemy.y && avatar.y < enemy.y + enemy.height())
+                       ) {
+                        resolveEnemyHitAvatar(enemy, avatar); 
+                    }
+                    var bullet = avatar.bullet;
+                    if ( bullet &&
+                        (bullet.x + bullet.image.width > enemy.x && bullet.x < enemy.x + enemy.width()) &&
+                        (bullet.y + bullet.image.height > enemy.y && bullet.y < enemy.y + enemy.height())) {
+                        resolveBulletHitEnemy(bullet, enemy); 
+                    }
+                }
+            }
+
+            function resolveEnemyHitAvatar(enemy, avatar) {
+                enemyManager.killEnemy(enemy);
+                avatar.hitPoints--;
+                avatar.x -= 40;
+                console.log("OUCH!");
+            }
+
+            function resolveBulletHitEnemy (bullet, enemy) {
+                enemyManager.killEnemy(enemy);
+                avatar.killBullet();
+                scoreManager.incrementScore();
+            }
+
+            function draw (canvas, timeElapsed, currentTime) {
+                var c = canvas.getContext("2d"), 
+                    b = avatar.bullet;
+                clearCanvas(canvas);
+
+                enemyManager.draw(canvas, timeElapsed, currentTime);
+                scoreManager.draw(canvas, timeElapsed, currentTime);
+
+                if (b) {
+                    // draw bullet
+                    c.drawImage(b.image, b.x, b.y);
+                }
+                // draw avatar
+                c.drawImage(avatar.image, avatar.x, avatar.y);
+            }
+
+            function clearCanvas(canvas) {
+                var c = canvas.getContext("2d");
+                c.beginPath();
+                c.rect(0,0,W,H);
+                c.fillStyle = "#CCCC99";
+                c.fill();
+            }
+
+
+            function Avatar () {
+                // position
+                this.x = 0;
+                this.y = 0;
+
+                // velocity
+                this.vx = 10;
+                this.vy = 10;
+
+                // HP
+                this.hitPoints = 10;
+
+                // view
+                this.image = new Image();
+                this.image.src = "whitemage.png";
+
+                this.bullet = null;
+
+                this.canFire = function () {
+                    return this.bullet == null;
+                }
+
+                this.spawnBullet = function () {
+                    this.bullet = new Bullet();
+                    this.bullet.x = this.x + this.image.width / 2;
+                    this.bullet.y = this.y + this.image.height / 2;
+                };
+
+                this.killBullet = function () {
+                    this.bullet = null;
+                }
+            }
+
+            function Bullet () {
+                this.x = 0;
+                this.y = 0;
+
+                this.vx = 0;
+                this.ax = 1;
+
+                this.image = new Image();
+                this.image.src = "bullet.png";
+            }
+
+            function Enemy (startTime) {
+                this.x = 0;
+                this.y = 0;
+
+                this.image = new Image();
+                this.image.src = "enemyRun.png";
+
+                this.fps = 3;
+                this.frameWidth = 24;
+                this.totalFrames = 4;
+                this.frameHeight = 24;
+                this.scale = 2.0;
+                this.startTime = startTime;
+
+                this.getCurrentFrame = function (currentTime) {
+                    return (Math.floor((currentTime / 1000) * this.fps) % this.totalFrames);
+                }
+
+                this.getFrameX = function (currentTime) {
+                    return this.getCurrentFrame(currentTime) * this.frameWidth;
+                }
+                this.getFrameY = function (currentTime) {
+                    return 0;
+                }
+
+                this.draw = function (canvas, timeElapsed, currentTime) {
+                    var c = canvas.getContext("2d");
+                    c.drawImage(this.image, this.getFrameX(currentTime), this.getFrameY(currentTime), this.frameWidth, this.frameHeight, this.x, this.y, this.frameWidth * this.scale, this.frameHeight * this.scale);
+                }
+
+                this.width = function () {
+                    return this.frameWidth * this.scale;
+                }
+                this.height = function () {
+                    return this.frameHeight * this.scale;
+                }
+            }
+
+            function EnemyManager () {
+                this.enemies = [];
+                this.SPEED = -5;
+                this.SPAWN_FREQUENCY = 800;
+                this.spawnTimer = 0;
+
+                this.spawnEnemy = function (currentTime) {
+                    var enemy = new Enemy(currentTime);
+                    enemy.x = W;
+                    enemy.y = Math.random() * (H - enemy.image.height);
+
+                    console.log("Spawned enemy");
+
+                    this.enemies.push(enemy);
+                }
+
+                this.update = function (timeElapsed, currentTime) {
+                    this.spawnTimer += timeElapsed;
+                    if (this.spawnTimer > this.SPAWN_FREQUENCY) {
+                        this.spawnEnemy(currentTime);
+                        this.spawnTimer = 0;
+                    }
+
+                    for (var i = 0; i < this.enemies.length; i++ ) {
+                        var enemy = this.enemies[i];
+                        if (enemy != null) {
+                            enemy.vy = Math.sin((currentTime - enemy.startTime)/300) * 5;
+                            enemy.x += this.SPEED;
+                            enemy.y += enemy.vy;
+
+                            if (enemy.x < 0 - enemy.image.width) {
+                                this.killEnemy(enemy);
+                            }
+                        }
+                    }
+                }
+
+                this.draw = function (canvas, timeElapsed, currentTime) {
+                    var c = canvas.getContext("2d");
+                    for (var i = 0; i < this.enemies.length; i++ ) {
+                        var enemy = this.enemies[i];
+                        if (enemy != null) {
+                            enemy.draw (canvas, timeElapsed, currentTime);
+                        }
+                    }
+                }
+
+                this.killEnemy = function (enemy) {
+                    var i = this.enemies.indexOf(enemy);
+                    if (i >= 0) {
+                        this.enemies.splice(i, 1);
+                    }
+                }
+            }
+
+            function ScoreManager () {
+                var score = 0,
+                    x = 0, y = 0;
+
+                this.incrementScore = function () {
+                    score += 100;
+                }
+
+                this.resetScore = function () {
+                    score = 0;
+                }
+
+                this.draw = function (canvas, timeElapsed, currentTime) {
+                    var c = canvas.getContext("2d"),
+                        text = score;
+
+                    c.font= "32px HUGE Avant Garde";
+                    c.fillStyle = "white";
+                    c.fillText(text, this.x, this.y);
+                }
+            }
+        </script>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600" />
+</body>
+</html>

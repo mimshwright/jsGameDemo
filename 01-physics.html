@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Game!</title>
+
+        <script type="text/javascript" charset="utf-8">
+            var previousTime = 0,
+                INTERVAL = 30,
+                W = 800,
+                H = 600,
+                GRAVITY = 1.0,
+                BOUNCY = 0.80,
+                avatar;
+
+            window.onload = function(){
+                var canvas = document.getElementById("canvas"),
+                    c = canvas.getContext("2d");
+
+                avatar = new Avatar();
+
+                setInterval(
+                    function () {
+                        var currentTime = new Date().getTime(),
+                            timeElapsed;
+
+                        if (previousTime == 0) {
+                            previousTime = currentTime;
+                        }
+
+                        timeElapsed = currentTime - previousTime;
+
+                        update (timeElapsed, currentTime);
+                        draw (canvas, timeElapsed, currentTime);
+
+                        previousTime = currentTime;
+                    }
+                , INTERVAL);
+            };
+
+            function update(timeElapsed, currentTime) {
+                
+                avatar.x += avatar.vx;
+                avatar.y += avatar.vy;
+                avatar.vy += GRAVITY;
+                
+
+                // constrain avatar to bounds of screen.
+                var topBound = 0, 
+                    rightBound = W - avatar.size,
+                    bottomBound = H - avatar.size,
+                    leftBound = 0;
+                
+                if (avatar.x > rightBound) {
+                    avatar.x = rightBound;
+                    avatar.vx *= -1;
+                    avatar.vx *= BOUNCY;
+                    avatar.vy *= BOUNCY;
+                } 
+                if (avatar.x < leftBound) {
+                    avatar.x = leftBound;
+                    avatar.vx *= -1;
+                    avatar.vx *= BOUNCY;
+                    avatar.vy *= BOUNCY;
+                }
+                if (avatar.y < topBound) {
+                    avatar.y = topBound;
+                    avatar.vy *= -1;
+                    avatar.vx *= BOUNCY;
+                    avatar.vy *= BOUNCY;
+                }
+                if (avatar.y > bottomBound) {
+                    avatar.y = bottomBound;
+                    avatar.vy *= -1;
+                    avatar.vx *= BOUNCY;
+                    avatar.vy *= BOUNCY;
+                }
+
+            }
+
+            function draw (canvas, timeElapsed, currentTime) {
+                var c = canvas.getContext("2d");
+                clearCanvas(canvas);
+
+                // draw avatar
+                c.beginPath();
+                c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
+                c.fillStyle = "#9900FF";
+                c.fill();
+            }
+
+            function clearCanvas(canvas) {
+                var c = canvas.getContext("2d");
+                c.beginPath();
+                c.rect(0,0,W,H);
+                c.fillStyle = "#CCCC99";
+                c.fill();
+            }
+
+
+            function Avatar () {
+                // position
+                this.x = 0;
+                this.y = 0;
+                
+                this.vx = 5;
+                this.vy = 0;
+                
+                this.size = 50;
+
+                // HP
+                this.hitPoints = 10;
+            }
+
+        </script>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600" />
+</body>
+</html>

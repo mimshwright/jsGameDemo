@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Game!</title>
+
+        <script type="text/javascript" charset="utf-8">
+            var previousTime = 0,
+                INTERVAL = 30,
+                W = 800,
+                H = 600,
+                avatar;
+
+            window.onload = function(){
+                var canvas = document.getElementById("canvas"),
+                    c = canvas.getContext("2d");
+
+                avatar = new Avatar();
+                avatar.x = (W - avatar.size) / 2;
+                avatar.y = (H - avatar.size) / 2;
+
+                setInterval(
+                    function () {
+                        var currentTime = new Date().getTime(),
+                            timeElapsed;
+
+                        if (previousTime == 0) {
+                            previousTime = currentTime;
+                        }
+
+                        timeElapsed = currentTime - previousTime;
+
+                        update (timeElapsed, currentTime);
+                        draw (canvas, timeElapsed, currentTime);
+
+                        previousTime = currentTime;
+                    }
+                , INTERVAL);
+            };
+
+            function update(timeElapsed, currentTime) {
+            }
+
+            function draw (canvas, timeElapsed, currentTime) {
+                var c = canvas.getContext("2d");
+                clearCanvas(canvas);
+
+                // draw avatar
+                c.beginPath();
+                c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
+                c.fillStyle = "#9900FF";
+                c.fill();
+            }
+
+            function clearCanvas(canvas) {
+                var c = canvas.getContext("2d");
+                c.beginPath();
+                c.rect(0,0,W,H);
+                c.fillStyle = "#CCCC99";
+                c.fill();
+            }
+
+
+            function Avatar () {
+                // position
+                this.x = 0;
+                this.y = 0;
+                
+                this.size = 50;
+            }
+
+        </script>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600" />
+</body>
+</html>
