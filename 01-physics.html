@@ -11,13 +11,17 @@
                 H = 600,
                 GRAVITY = 1.5,
                 BOUNCY = 0.80,
-                avatar;
+                avatars = [];
 
             window.onload = function(){
                 var canvas = document.getElementById("canvas"),
                     c = canvas.getContext("2d");
 
-                avatar = new Avatar();
+                avatars.push( new Avatar() );
+                canvas.addEventListener ("click", function () {
+                    avatars.push( new Avatar() );
+                });
+
 
                 setInterval(
                     function () {
@@ -40,53 +44,59 @@
 
             function update(timeElapsed, currentTime) {
 
-                avatar.x += avatar.vx;
-                avatar.y += avatar.vy;
-                avatar.vy += GRAVITY;
+                for (var i in avatars) {
+                    var avatar = avatars[i];
+
+                    avatar.vy += GRAVITY;
+                    avatar.x += avatar.vx;
+                    avatar.y += avatar.vy;
 
 
-                // constrain avatar to bounds of screen.
-                var topBound = 0,
-                    rightBound = W - avatar.size,
-                    bottomBound = H - avatar.size,
-                    leftBound = 0;
+                    // constrain avatar to bounds of screen.
+                    var topBound = 0,
+                        rightBound = W - avatar.size,
+                        bottomBound = H - avatar.size,
+                        leftBound = 0;
 
-                if (avatar.x > rightBound) {
-                    avatar.x = rightBound;
-                    avatar.vx *= -1;
-                    avatar.vx *= BOUNCY;
-                    avatar.vy *= BOUNCY;
+                    if (avatar.x > rightBound) {
+                        avatar.x = rightBound;
+                        avatar.vx *= -1;
+                        avatar.vx *= BOUNCY;
+                        avatar.vy *= BOUNCY;
+                    }
+                    if (avatar.x < leftBound) {
+                        avatar.x = leftBound;
+                        avatar.vx *= -1;
+                        avatar.vx *= BOUNCY;
+                        avatar.vy *= BOUNCY;
+                    }
+                    if (avatar.y < topBound) {
+                        avatar.y = topBound;
+                        avatar.vy *= -1;
+                        avatar.vx *= BOUNCY;
+                        avatar.vy *= BOUNCY;
+                    }
+                    if (avatar.y > bottomBound) {
+                        avatar.y = bottomBound;
+                        avatar.vy *= -1;
+                        avatar.vx *= BOUNCY;
+                        avatar.vy *= BOUNCY;
+                    }
                 }
-                if (avatar.x < leftBound) {
-                    avatar.x = leftBound;
-                    avatar.vx *= -1;
-                    avatar.vx *= BOUNCY;
-                    avatar.vy *= BOUNCY;
-                }
-                if (avatar.y < topBound) {
-                    avatar.y = topBound;
-                    avatar.vy *= -1;
-                    avatar.vx *= BOUNCY;
-                    avatar.vy *= BOUNCY;
-                }
-                if (avatar.y > bottomBound) {
-                    avatar.y = bottomBound;
-                    avatar.vy *= -1;
-                    avatar.vx *= BOUNCY;
-                    avatar.vy *= BOUNCY;
-                }
-
             }
 
             function draw (canvas, timeElapsed, currentTime) {
                 var c = canvas.getContext("2d");
                 clearCanvas(canvas);
 
-                // draw avatar
-                c.beginPath();
-                c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
-                c.fillStyle = "#9900FF";
-                c.fill();
+                for (var i in avatars) {
+                    var avatar = avatars[i];
+                    // draw avatar
+                    c.beginPath();
+                    c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
+                    c.fillStyle = "#9900FF";
+                    c.fill();
+                }
             }
 
             function clearCanvas(canvas) {
