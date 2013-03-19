@@ -47,6 +47,11 @@
                 for (var i in avatars) {
                     var avatar = avatars[i];
 
+
+                    if (avatar.dead) {
+                        continue;
+                    }
+
                     avatar.vy += GRAVITY;
                     avatar.x += avatar.vx;
                     avatar.y += avatar.vy;
@@ -82,6 +87,13 @@
                         avatar.vx *= BOUNCY;
                         avatar.vy *= BOUNCY;
                     }
+
+                    if ( Math.abs(avatar.vx) <= 1 &&
+                         Math.abs(avatar.vy) <= 1 &&
+                         Math.abs(avatar.y - bottomBound) <= 1) {
+                        avatar.y = bottomBound;
+                        avatar.dead = true;
+                    }
                 }
             }
 
@@ -94,7 +106,7 @@
                     // draw avatar
                     c.beginPath();
                     c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
-                    c.fillStyle = "#9900FF";
+                    c.fillStyle = "#660099";
                     c.fill();
                 }
             }
@@ -109,12 +121,14 @@
 
 
             function Avatar () {
+                this.dead = false;
+
                 // position
                 this.x = 300;
                 this.y = 100;
 
                 this.vx = Math.random() * 10 - 5; // random between -5 and 5
-                this.vy = -10; 
+                this.vy = -12; 
 
                 this.size = 50;
 
