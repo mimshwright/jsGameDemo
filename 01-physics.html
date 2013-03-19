@@ -105,8 +105,9 @@
                     var avatar = avatars[i];
                     // draw avatar
                     c.beginPath();
-                    c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
-                    c.fillStyle = "#660099";
+                    var r = avatar.size/2;
+                    c.arc(avatar.x + r, avatar.y + r, r, 0, Math.PI *2);
+                    c.fillStyle = "#" + avatar.color.toString(16);
                     c.fill();
                 }
             }
@@ -128,9 +129,11 @@
                 this.y = 100;
 
                 this.vx = Math.random() * 10 - 5; // random between -5 and 5
-                this.vy = -12; 
+                this.vy = -12;
 
                 this.size = 50;
+
+                this.color = 0x660000 + Math.floor(Math.random() * 255);
 
                 // HP
                 this.hitPoints = 10;
@@ -140,5 +143,6 @@
 </head>
 <body>
 <canvas id="canvas" width="800" height="600" />
+<p>click to add more</p>
 </body>
 </html>
