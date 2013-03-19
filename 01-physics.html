@@ -6,10 +6,10 @@
 
         <script type="text/javascript" charset="utf-8">
             var previousTime = 0,
-                INTERVAL = 30,
+                INTERVAL = 15,
                 W = 800,
                 H = 600,
-                GRAVITY = 1.0,
+                GRAVITY = 1.5,
                 BOUNCY = 0.80,
                 avatar;
 
@@ -39,24 +39,24 @@
             };
 
             function update(timeElapsed, currentTime) {
-                
+
                 avatar.x += avatar.vx;
                 avatar.y += avatar.vy;
                 avatar.vy += GRAVITY;
-                
+
 
                 // constrain avatar to bounds of screen.
-                var topBound = 0, 
+                var topBound = 0,
                     rightBound = W - avatar.size,
                     bottomBound = H - avatar.size,
                     leftBound = 0;
-                
+
                 if (avatar.x > rightBound) {
                     avatar.x = rightBound;
                     avatar.vx *= -1;
                     avatar.vx *= BOUNCY;
                     avatar.vy *= BOUNCY;
-                } 
+                }
                 if (avatar.x < leftBound) {
                     avatar.x = leftBound;
                     avatar.vx *= -1;
@@ -100,12 +100,12 @@
 
             function Avatar () {
                 // position
-                this.x = 0;
-                this.y = 0;
-                
-                this.vx = 5;
-                this.vy = 0;
-                
+                this.x = 300;
+                this.y = 100;
+
+                this.vx = Math.random() * 10 - 5; // random between -5 and 5
+                this.vy = -10; 
+
                 this.size = 50;
 
                 // HP
