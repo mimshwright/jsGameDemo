@@ -68,7 +68,7 @@
                 clearCanvas(canvas);
 
                 // draw avatar
-                c.drawImage(avatar.image, avatar.x, avatar.y);
+                avatar.draw(c);
             }
 
             function clearCanvas(canvas) {
@@ -95,6 +95,10 @@
                 // view
                 this.image = new Image();
                 this.image.src = "img/whitemage.png";
+
+                this.draw = function (context) {
+                    context.drawImage(this.image, this.x, this.y);
+                }
             }
 
         </script>

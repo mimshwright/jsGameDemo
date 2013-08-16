@@ -68,10 +68,7 @@
                 clearCanvas(canvas);
 
                 // draw avatar
-                c.beginPath();
-                c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
-                c.fillStyle = "#9900FF";
-                c.fill();
+                avatar.draw(c);
             }
 
             function clearCanvas(canvas) {
@@ -92,9 +89,14 @@
                 this.vy = 10;
                 
                 this.size = 50;
+                this.color = "#9900FF";
 
-                // HP
-                this.hitPoints = 10;
+                this.draw = function (context) {
+                    context.beginPath();
+                    context.rect(this.x, this.y, this.size, this.size);
+                    context.fillStyle = this.color;
+                    context.fill();
+                }
             }
 
         </script>

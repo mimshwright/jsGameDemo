@@ -48,7 +48,7 @@
                 // draw avatar
                 c.beginPath();
                 c.rect(avatar.x, avatar.y, avatar.size, avatar.size);
-                c.fillStyle = "#9900FF";
+                c.fillStyle = avatar.color;
                 c.fill();
             }
 
@@ -65,8 +65,8 @@
                 // position
                 this.x = 0;
                 this.y = 0;
-                
                 this.size = 50;
+                this.color = "#9900FF";
             }
 
         </script>

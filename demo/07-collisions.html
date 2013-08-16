@@ -122,10 +122,10 @@
 
                 if (b) {
                     // draw bullet
-                    c.drawImage(b.image, b.x, b.y);
+                    b.draw(c);
                 }
                 // draw avatar
-                c.drawImage(avatar.image, avatar.x, avatar.y);
+                avatar.draw(c);
             }
 
             function clearCanvas(canvas) {
@@ -168,6 +168,10 @@
                 this.killBullet = function () {
                     this.bullet = null;
                 }
+
+                this.draw = function (context) {
+                    context.drawImage(this.image, this.x, this.y);
+                }
             }
 
             function Bullet () {
@@ -179,6 +183,10 @@
 
                 this.image = new Image();
                 this.image.src = "img/bullet.png";
+
+                this.draw = function (context) {
+                    context.drawImage(this.image, this.x, this.y);
+                }
             }
 
             function Enemy (startTime) {
